@@ -1,0 +1,66 @@
+name: Update Banner by Thailand Time
+
+on:
+  schedule:
+    - cron: "0 23 * * *"   # 06:00 Asia/Bangkok (Morning)
+    - cron: "0 4 * * *"    # 11:00 Asia/Bangkok (Day)
+    - cron: "30 9 * * *"   # 16:30 Asia/Bangkok (Golden Hour)
+    - cron: "0 12 * * *"   # 19:00 Asia/Bangkok (Night)
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: "Scene phase (auto, morning, day, golden, night)"
+        required: false
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - morning
+          - day
+          - golden
+          - night
+
+permissions:
+  contents: write
+
+jobs:
+  update-banner:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select scene for Thailand time (UTC+7)
+        id: select
+        env:
+          INPUT_PHASE: ${{ github.event.inputs.phase }}
+        run: |
+          if [ -n "$INPUT_PHASE" ] && [ "$INPUT_PHASE" != "auto" ]; then
+            PHASE="$INPUT_PHASE"
+          else
+            HM=$(TZ="Asia/Bangkok" date +%H%M)
+            if [ "$HM" -ge 0600 ] && [ "$HM" -lt 1100 ]; then
+              PHASE="morning"
+            elif [ "$HM" -ge 1100 ] && [ "$HM" -lt 1630 ]; then
+              PHASE="day"
+            elif [ "$HM" -ge 1630 ] && [ "$HM" -lt 1900 ]; then
+              PHASE="golden"
+            else
+              PHASE="night"
+            fi
+          fi
+          echo "Selected phase: $PHASE"
+          cp "assets/room-${PHASE}.svg" "assets/room.svg"
+          echo "phase=${PHASE}" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet assets/room.svg; then
+            echo "Banner is already set to ${{ steps.select.outputs.phase }}, no commit needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/room.svg
+          git commit -m "Update banner to ${{ steps.select.outputs.phase }} scene (Thailand time)"
+          git push
