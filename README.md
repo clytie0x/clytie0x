@@ -1,3 +1,1 @@
-<img src="./assets/room.svg" width="100%" alt="Pixel art at golden hour. A river winds toward the setting sun, a computer and a lantern sit on a desk under a big tree, and a sloth hangs from a branch and waves. Hi, I&#x27;m Teerapat!">
-
-<img src="./assets/card-about-me.svg" width="100%" alt="ABOUT ME: Computer Science student at Prince of Songkla University.">
+<img src="./assets/room.svg" width="100%" alt="Pixel art at golden hour. A river winds toward the setting sun, a computer and a lantern sit on a desk under a big tree, and a sloth hangs from a branch and waves. Hi, I&#x27;m Teerapat! — Computer Science student at Prince of Songkla University.">
